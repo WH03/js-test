@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+
+		<script>
+			// 抓表；箱子暂存台互相移动
+			export const grabMeter = async (
+				manager: ModelManager,
+				mdoelId: string,
+				start: string,
+				end: string,
+				time: number,
+			) => {
+				// 获取模型，用来绑定父子关系
+				const grap = manager.getBabylonNodeIfNeed(`抓手座`) !;
+				const robotMesh = manager.getBabylonNodeIfNeed(`工作台底板`) !;
+				const meter = manager.getBabylonNodeIfNeed(mdoelId) !;
+				// 设置旋转角度
+				const zero = Vector3.Zero();
+				const rotation = new Vector3(Math.PI / 2, 0, 0)
+				let boxMesh: AbstractMesh | TransformNode;
+				let HC2Box: boolean = false; //
+
+				// 获取起点终点的坐标
+				if (start.startsWith('HC')) { //起点暂存台，从暂存台到箱子
+					HC2Box = true;
+					let endData = end.split('_') // 获取箱子序号
+					end = endData[1];
+					boxMesh = manager.getBabylonNodeIfNeed(`box${endData[0]}`) !
+				} else { //从箱子到暂存台
+					HC2Box = false;
+					start = start.split('_')[1]
+				}
+				const startRotateList = getAnimData(start); //起点
+				const endRotateList = getAnimData(end); //终点
+				// 分配时间
+				const result = aminDurationDispatch({
+					toStart: 2,
+					toEnd: 3,
+					initial: 3,
+				}, time);
+				// 动作执行顺序：抓 -> 绑定 -> 复位 -> 放置
+				await startAnimByOrder(manager, startRotateList, result.toStart, grabOrderMap); // 抓表顺序
+				await bindAssets(meter, grap, true, zero, zero);
+				await startAnimByOrder(manager, initialRotate, result.initial, resetOrderMap); // 复位顺序
+				await startAnimByOrder(manager, endRotateList, result.toEnd, grabOrderMap); // 终点
+				if (HC2Box) { //起点暂存台，从暂存台到箱子
+					await bindAssets(meter, boxMesh!, true, rotation, zero);
+				} else { //从箱子到暂存台
+					await bindAssets(meter, robotMesh, true, zero, zero);
+				}
+				await startAnimByOrder(manager, initialRotate, result.initial, resetOrderMap); //初始顺序
+			}
+
+
+
+			export const grabMeterEPHC = async (
+				manager: ModelManager,
+				modelId: string,
+				start: string,
+				end: string,
+				time: number,
+			) => {
+				const grap = manager.getBabylonNodeIfNeed(`抓手座`) !;
+				const robotMesh = manager.getBabylonNodeIfNeed(`工作台底板`) !;
+				const changeModel = manager.getBabylonNodeIfNeed('断路器-换位板') !;
+				const zero = Vector3.Zero();
+
+				// 根据方向设置抓取位置、换位板旋转和位置纠偏
+				let grabPos = new Vector3(0, -0.2, 0);
+				let changeRotation: Vector3;
+				let changePos = new Vector3(0, 0.06, 0);
+
+				let EP2HC: boolean = false
+				if (start.startsWith('EP')) {
+					EP2HC = true
+					changeRotation = new Vector3(Math.PI / 3 * 2, 0, 0);
+				} else {
+					EP2HC = false
+					changeRotation = new Vector3(Math.PI / 3 * 2, 0, Math.PI);
+				}
+
+				// 获取动画数据
+				const startRotateList = getAnimData(start);
+				const endRotateList = getAnimData(end);
+				const ZX01RotateList = getAnimData(`ZXT01`);
+				const ZX02RotateList = getAnimData(`ZXT02`);
+
+				// 处理提升旋转数据（仅适用于 EP2HC 方向）
+				const rotateOffset: Record < string, number > = {
+					J03: 8,
+					J05: -8
+				};
+				let riseRotate: AnimData[] = [];
+				if (EP2HC) {
+					riseRotate = getRiseData(startRotateList, rotateOffset);
+				}
+
+				// 配置动画时间段
+				const result = aminDurationDispatch({
+					toStart: 2,
+					rise: 1,
+					init: EP2HC ? 2.5 : 2,
+					toChange: 1,
+					toHC: 2,
+					toRise: 1,
+					toEnd: EP2HC ? 1 : 2,
+					initial: EP2HC ? 1 : 3,
+				}, time);
+
+				const meter = manager.getBabylonNodeIfNeed(modelId) !;
+
+				// 动作执行顺序：抓 -> 绑定 -> 复位 -> 放置
+				await startAnimByOrder(manager, startRotateList, result.toStart, grabOrderMap); // 抓表顺序
+				await bindAssets(meter, grap, true, zero, grabPos);
+
+				if (EP2HC) {
+					// 提升到一定高度
+					const J01Rotate = manager.getBabylonNodeIfNeed(`J01`) !.rotation;
+					riseRotate[0].y = arc2Angle(J01Rotate).y!;
+					await startAnimByOrder(manager, riseRotate, result.rise, initOrderMap);
+
+					// 复位顺序
+					await startAnimByOrder(manager, initialRotate, result.init, resetOrderMap);
+
+					// 换位板操作
+					await startAnimByOrder(manager, ZX02RotateList, result.toChange, ZXT02Map);
+					await bindAssets(meter, changeModel, false, changeRotation, changePos);
+					await startAnimByOrder(manager, ZX01RotateList, result.toHC, ZXT01Map);
+
+					// 再次绑定表到抓手
+					await bindAssets(meter, grap, true, meter.rotation, grabPos);
+					await startAnimByOrder(manager, initialRotate, result.toRise, initOrderMap); // 复位提升
+				} else {
+					// HC2EP 操作
+					await startAnimByOrder(manager, ZX01RotateList, result.toHC, ZXT01MapRe);
+					await bindAssets(meter, grap, true, meter.rotation, grabPos);
+					await startAnimByOrder(manager, ZX01RotateList, result.toChange, ZXT01MapRe);
+					await bindAssets(meter, changeModel, false, changeRotation, changePos);
+					await startAnimByOrder(manager, ZX02RotateList, result.toChange, ZXT02MapRe);
+
+					// 再次绑定表到抓手
+					meter = manager.getBabylonNodeIfNeed(modelId) !;
+					const newRotate = new Vector3(Math.PI / 2, Math.PI / 2, 0);
+					await bindAssets(meter, grap, false, newRotate, grabPos);
+					await startAnimByOrder(manager, initialRotate, result.rise, resetOrderMap); // 初始顺序
+				}
+
+				// 终点操作
+				await startAnimByOrder(manager, endRotateList, result.toEnd, EP2HC ? endOrderMap :
+					grabOrderMap);
+
+				// 解绑或复位
+				await bindAssets(meter, robotMesh, true, zero, zero);
+				await startAnimByOrder(manager, initialRotate, result.initial, resetOrderMap); // 初始顺序
+			};
+		</script>
+	</body>
+</html>

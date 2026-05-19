@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fetch发送post请求</title>
+</head>
+
+<body>
+    <script>
+        /*
+            接口地址：http://ajax-base-api-t.itheima.net/api/getbooks
+            请求方式：post，
+            请求参数：
+                1、书名：bookname，
+                2、作者：author，
+                3、出版社：publisher，
+            发送json格式的数据
+        */
+        const url = 'http://ajax-base-api-t.itheima.net/api/addbook'
+        async function add(params) {
+            let obj = {
+                bookname: '一本好书', // params.bookname,
+                author: '张三', // params.author,
+                publisher: '人民出版社' // params.publisher
+            }
+            let res = await fetch(url, {
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+            let json = swait res.json()
+
+
+        }
+    </script>
+</body>
+
+</html>

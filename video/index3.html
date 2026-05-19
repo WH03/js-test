@@ -1,0 +1,29 @@
+
+
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+	<meta charset="UTF-8">
+	<title>HLS 实时播放 — Video.js 示例</title>
+	<link href="https://vjs.zencdn.net/7.20.3/video-js.min.css" rel="stylesheet">
+</head>
+
+<body>
+	<video id="my-video" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360">
+		<source src="http://192.168.2.45:18080/stream.m3u8" type="application/x-mpegURL">
+	</video>
+
+	<script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
+	<script src="https://unpkg.com/@videojs/http-streaming@latest/dist/videojs-http-streaming.min.js"></script>
+	<script>
+		const player = videojs('my-video', {
+			html5: {
+				vhs: { overrideNative: true }
+			}
+		});
+		player.play();
+	</script>
+</body>
+
+</html>

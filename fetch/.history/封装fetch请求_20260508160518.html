@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>封装fetch请求</title>
+</head>
+
+<body>
+    <script>
+        const url = 'http://ajax-base-api-t.itheima.net/api/getbooks'
+        // 封装fetch请求
+        async function http(obj) {
+            let { url, method, params, data } = obj
+            // 处理params参数，将其转换成查询字符串的形式：key：value，拼接到url后面
+            if (params) {
+                let str = new URLSearchParams(params).toString()
+                url += `?${str}`
+            }
+            console.log('url:', url)
+        }
+
+        // 测试代码1
+        async function fn1() {
+            let result = await http({
+                url: url,
+                method: 'get',
+                params: {
+                    id: 2
+                }
+            })
+            // console.log('result:', result)
+        }
+        fn1()
+        // 测试代码2
+        async function fn2() {
+            let result = await http({
+                url: url,
+                method: 'post',
+                data: {
+                    bookname: '测试书籍',
+                    author: '测试作者',
+                    publisher: '测试出版社'
+                }
+            })
+        }
+        fn2()
+    </script>
+</body>
+
+</html>

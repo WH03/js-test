@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>RTSP → WebSocket → Canvas</title>
+</head>
+
+<body>
+	<canvas id="videoCanvas" width="1280" height="720"></canvas>
+
+	<!-- 引入 JSMpeg 解码器 -->
+	<script src="jsmpeg.min.js"></script>
+	<script>
+		// 前端监听后端的 WebSocket 端口（和你 wsPort 保持一致）
+		const wsUrl = 'ws://' + window.location.hostname + ':3333';
+		// const wsUrl = 'http://192.168.2.45:18080/stream.m3u8';
+		
+		const canvas = document.getElementById('videoCanvas');
+
+		// 创建 JSMpeg 播放器，将来自 WebSocket 的 MPEG-TS 流渲染到 Canvas 上
+		const player = new JSMpeg.Player(wsUrl, {
+			canvas: canvas,
+			autoplay: true,
+			audio: false,     // 默认为视频+音频，这里可根据实际情况关闭音频
+			loop: false
+		});
+	</script>
+</body>
+
+</html>

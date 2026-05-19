@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Excel Reader Demo</title>
+		<!-- 一定要先加载 SheetJS -->
+		<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+	</head>
+	<body>
+		<h2>选择 Excel 文件：</h2>
+		<input type="file" id="fileInput" accept=".xls,.xlsx" />
+		<pre id="output"></pre>
+
+		<script>
+			// 确保这里能访问到 XLSX
+			console.log('SheetJS loaded?', typeof XLSX !== 'undefined');
+
+			document.getElementById('fileInput').addEventListener('change', function(e) {
+				const file = e.target.files[0];
+				if (!file) return;
+
+				const reader = new FileReader();
+				reader.onload = function(event) {
+					const data = event.target.result;
+					const workbook = XLSX.read(data, {
+						type: 'array'
+					});
+					const ws = workbook.Sheets[workbook.SheetNames[0]];
+					const json = XLSX.utils.sheet_to_json(ws, {
+						header: 1
+					});
+					console.log('@@json：文件内容', json)
+					document.getElementById('output').textContent = JSON.stringify(json, null, 2);
+				};
+
+				reader.readAsArrayBuffer(file);
+			});
+		</script>
+	</body>
+</html>

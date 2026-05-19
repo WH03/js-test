@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fetch发送post请求</title>
+</head>
+
+<body>
+    <script>
+        /*
+            接口地址：http://ajax-base-api-t.itheima.net/api/getbooks
+            请求方式：post，
+            请求参数：
+                1、书名：bookname，
+                2、作者：author，
+                3、出版社：publisher，
+            发送json格式的数据
+        */
+        const url = 'http://ajax-base-api-t.itheima.net/api/getbooks';
+        async function getData() {
+            try {
+                let res = await fetch(url);
+                let json = await res.json();
+                console.log(json)
+                console.log('res.ok:', res.ok)// 是否成功请求,true or false
+                console.log('res.status:', res.status)// 状态码
+                console.log('res.statusText:', res.statusText)// 状态码对应的文本
+                console.log('res.headers:', res.headers)// 响应头
+                console.log('res.url:', res.url)// 请求地址
+                console.log('res.type:', res.type)// 请求类型
+                console.log('res.body:', res.body)// ReadableStream对象，表示响应体
+                console.log('res.bodyUsed:', res.bodyUsed)// 是否已经使用过响应体
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        getData();
+    </script>
+</body>
+
+</html>

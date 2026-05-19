@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fetch发送基本的get请求-async-await</title>
+</head>
+
+<body>
+    <script>
+        /*
+            接口地址：http://ajax-base-api-t.itheima.net/api/getbooks
+            请求方式：GET，
+            请求参数：可选
+        */
+        // fetch('http://ajax-base-api-t.itheima.net/api/getbooks').then(res => {
+        //     // 直接得到的是一个Response对象，不能直接使用，需要调用res.json()方法将其转换成json数据
+        //     return res.json()
+        // }).then(json => {
+        //     // 获取经过res.json()处理过的json数据
+        //     console.log(json)
+        // }).catch(err => {
+        //     // 捕获错误
+        //     console.log(err)
+        // })
+        // const url = 'http://ajax-base-api-t.itheima.net/api/getbooks'
+        // async function getData(url) {
+        //     try {
+        //         let res = await fetch(url);
+        //         let json = await res.json()
+        //         console.log('async-await:', json)
+        //     } catch (err) {
+        //         // 捕获错误
+        //         console.log(err)
+        //     }
+        // }
+
+        // 设置查询参数
+        getData(url)
+    </script>
+</body>
+
+</html>

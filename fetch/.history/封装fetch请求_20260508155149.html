@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>封装fetch请求</title>
+</head>
+
+<body>
+    <script>
+        const url = 'http://ajax-base-api-t.itheima.net/api/getbooks'
+        async function http() {
+
+        }
+
+        // 测试代码1
+        async function fn1() {
+            let result = await http({
+                url: url,
+                method: 'get',
+                params: {
+
+                }
+            })
+            console.log('result:', result)
+        }
+
+        // 测试代码2
+        async function fn2() {
+
+        }
+    </script>
+</body>
+
+</html>
